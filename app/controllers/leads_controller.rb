@@ -13,7 +13,7 @@ class LeadsController < ApplicationController
   def update
     render_validation(@lead) unless @lead.update_attributes(lead_params)
   end
-  
+
   private
 
   def lead_params
