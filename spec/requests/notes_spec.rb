@@ -49,4 +49,48 @@ RSpec.describe 'Notes', type: :request do
       end
     end
   end
+
+  describe 'POST /leads/:lead_id/notes.json' do
+    let(:attributes) { attributes_for(:note).stringify_keys }
+    subject { post "/leads/#{lead.id}/notes.json", {note: attributes}, @env}
+
+    [:admin, :regular].each do |role|
+      context "as #{role}" do
+
+        before do
+          login_as "andrzej.sliwa@i-tool.eu", role
+        end
+
+        context 'with valid attributes' do
+          it 'responds with created lead' do
+            subject
+            expect(response.status).to eq(200)
+            expect(json_response).to eq('note' => attributes.merge('id' => Note.last.id))
+          end
+
+          it 'creates a note owned by current user' do
+            subject
+            expect(response.status).to eq(200)
+            expect(Note.with_role(role, current_user)).not_to be_nil
+          end
+        end
+
+        context 'with missing message' do
+          let(:attributes) { attributes_for(:note).except(:message).stringify_keys }
+          it 'responds with validation errors' do
+            subject
+            expect(response.status).to eq(422)
+            expect(json_response['errors'].keys).to eq(['message'])
+          end
+        end
+      end
+    end
+
+    context "as GUEST" do
+      it 'responds forbiden' do
+        subject
+        expect(response.status).to eq(403)
+      end
+    end
+  end
 end
