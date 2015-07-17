@@ -23,4 +23,30 @@ RSpec.describe 'Notes', type: :request do
       end
     end
   end
+
+  describe 'GET /leads/:lead_id/notes/:id.json' do
+    subject { get "/leads/#{lead.id}/notes/#{note.id}.json", {}, @env }
+
+    [:admin, :guest, :regular].each do |role|
+      context "as #{role.upcase}" do
+        let(:note) { lead.notes.create(message: "message", details: "details") }
+
+        it 'returns note' do
+          subject
+          expect(response.status).to eq(200)
+          expect(json_response).to eq({'note' => {'id' => note.id,
+                                                  'details' => note.details,
+                                                  'message' => note.message}})
+        end
+      end
+    end
+
+    describe "missing data" do
+      let(:note) { double(id: 0) }
+      it 'responds not_found' do
+        subject
+        expect(response.status).to eq(404)
+      end
+    end
+  end
 end
