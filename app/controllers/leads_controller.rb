@@ -5,6 +5,11 @@ class LeadsController < ApplicationController
     render_validation(@lead) unless @lead.save
   end
 
+  def destroy
+    @lead.destroy
+    render nothing: true, status: :no_content
+  end
+  
   private
 
   def lead_params

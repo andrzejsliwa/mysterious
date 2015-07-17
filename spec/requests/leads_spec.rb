@@ -10,7 +10,7 @@ RSpec.describe 'leads', type: :request do
       context "as #{role.upcase}" do
         before do
           login_as "andrzej.sliwa@i-tool.eu", role
-          create(:lead) 
+          create(:lead)
         end
 
         it 'returns list of leads' do
@@ -95,5 +95,36 @@ RSpec.describe 'leads', type: :request do
         end
       end
     end
-  end	
+  end
+
+  describe 'DELETE /leads/:id.json' do
+    let!(:lead) { create(:lead) }
+    subject { delete "/leads/#{lead.id}.json", {}, @env }
+
+    context 'as ADMIN' do
+      before { login_as "andrzej.sliwa@i-tool.eu", :admin }
+
+      it 'destroys the lead' do
+        expect { subject }.to change { Lead.count }.by(-1)
+      end
+
+      it 'responds with :no_content' do
+        subject
+        expect(response.status).to eq(204)
+      end
+    end
+
+    [:regular, :guest].each do |role|
+      context "as #{role}" do
+        before do
+          login_as "andrzej.sliwa@i-tool.eu", role
+        end
+
+        it 'responds forbiden' do
+          subject
+          expect(response.status).to eq(403)
+        end
+      end
+    end
+  end
 end
