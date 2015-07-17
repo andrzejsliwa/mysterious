@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'leads', type: :request do
+RSpec.describe 'Leads', type: :request do
   include AuthenticationHelper
 
   describe 'GET /leads.json' do
