@@ -6,6 +6,11 @@ class NotesController < ApplicationController
     render_validation(@note) unless @note.save
   end
 
+  def destroy
+    @note.destroy
+    render nothing: true, status: :no_content
+  end
+
   private
 
   def note_params

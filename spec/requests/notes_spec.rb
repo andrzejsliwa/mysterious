@@ -93,4 +93,56 @@ RSpec.describe 'Notes', type: :request do
       end
     end
   end
+
+  describe 'DELETE /leads/:lead_id/notes/:id.json' do
+    let!(:note) { lead.notes.create(message: "message", details: "details") }
+    subject { delete "/leads/#{lead.id}/notes/#{note.id}.json", {}, @env }
+
+    context 'as ADMIN' do
+      before { login_as "andrzej.sliwa@i-tool.eu", :admin }
+
+      it 'responds with :no_content' do
+        subject
+        expect(response.status).to eq(204)
+      end
+
+      it 'destroys the note' do
+        expect { subject }.to change { Note.all.size }.by(-1)
+      end
+    end
+
+    context "as REGULAR" do
+      before { login_as "andrzej.sliwa@i-tool.eu", :regular }
+      context "as OWNER" do
+        before { current_user.grant :regular, note }
+
+        it 'destroys the note' do
+          expect { subject }.to change { Note.count }.by(-1)
+        end
+
+        it 'responds with :no_content' do
+          subject
+          expect(response.status).to eq(204)
+        end
+      end
+
+      context "as NOT OWNER" do
+        it 'responds forbiden' do
+          subject
+          expect(response.status).to eq(403)
+        end
+      end
+    end
+
+    context "as GUEST" do
+      before do
+        login_as "andrzej.sliwa@i-tool.eu", :regular
+      end
+
+      it 'responds forbiden' do
+        subject
+        expect(response.status).to eq(403)
+      end
+    end
+  end
 end
