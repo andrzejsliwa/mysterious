@@ -9,6 +9,10 @@ class LeadsController < ApplicationController
     @lead.destroy
     render nothing: true, status: :no_content
   end
+
+  def update
+    render_validation(@lead) unless @lead.update_attributes(lead_params)
+  end
   
   private
 

@@ -127,4 +127,32 @@ RSpec.describe 'leads', type: :request do
       end
     end
   end
+
+  describe 'PATCH /leads/:id.json' do
+    let(:lead) { create(:lead) }
+    let(:new_full_name) { "new" }
+    subject { patch "/leads/#{lead.id}.json",
+                    {lead: lead.attributes.merge(full_name: new_full_name)}, @env }
+
+    context 'as ADMIN' do
+      before { login_as "andrzej.sliwa@i-tool.eu", :admin }
+
+      it 'updates lead entity' do
+        expect { subject; lead.reload }.to change { lead.full_name }.to(new_full_name)
+      end
+    end
+
+    [:regular, :guest].each do |role|
+      context "as #{role}" do
+        before do
+          login_as "andrzej.sliwa@i-tool.eu", role
+        end
+
+        it 'responds forbiden' do
+          subject
+          expect(response.status).to eq(403)
+        end
+      end
+    end
+  end
 end
