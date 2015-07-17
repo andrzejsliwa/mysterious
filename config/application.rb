@@ -31,5 +31,14 @@ module Mysterious
 
     # Do not swallow errors in after_commit/after_rollback callbacks.
     config.active_record.raise_in_transactional_callbacks = true
+
+    # Its API backend so we dont need all view related stuff in generators.
+    config.generators do |g|
+      g.helper false
+      g.assets false
+      g.view_specs false
+      g.template_engine false
+      g.javascript false
+    end
   end
 end
