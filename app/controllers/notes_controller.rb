@@ -11,6 +11,10 @@ class NotesController < ApplicationController
     render nothing: true, status: :no_content
   end
 
+  def update
+    render_validation(@note) unless @note.update_attributes(note_params)
+  end
+
   private
 
   def note_params
